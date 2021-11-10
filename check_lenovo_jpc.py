@@ -624,12 +624,12 @@ def check_bladehealth():
 		nagios_status(warning)
 
 def check_systemhealth():
-	systemhealthstat = snmpget('1.3.6.1.4.1.2.3.51.2.2.7.1.0')
-	index,severity,description,date = (1,2,3,4)
+	systemhealthstat = snmpget('1.3.6.1.4.1.2.3.51.3.1.4.1.0')
+	index,severity,description = (1,2,3)
 	# Check overall health
 	if systemhealthstat == '255':
 		nagios_status(ok)
-		add_summary("Bladecenter health: OK. ")
+		add_summary("Lenovo 3650 health: OK. ")
 	elif systemhealthstat == "2":
 		nagios_status(warning)
 		add_summary("Non-Critical Error. ")
@@ -641,9 +641,9 @@ def check_systemhealth():
 		add_summary("Critical. ")
 	else:
 		nagios_status(unknown)
-		add_summary("Bladecenter health unkown (oid 1.3.6.1.4.1.2.3.51.2.2.7.1.0 returns %s). " % systemhealthstat)
+		add_summary("Lenovo 3050 health unkown (oid 1.3.6.1.4.1.2.3.51.3.1.4.1.0 returns %s). " % systemhealthstat)
 	if systemhealthstat == "2" or systemhealthstat == "4" or systemhealthstat == "0": 
-		summary = getTable('1.3.6.1.4.1.2.3.51.2.2.7.2.1')
+		summary = getTable('1.3.6.1.4.1.2.3.51.3.1.4.2.1')
 		for row in summary.values():
 			if row[severity] == 'Good':
 				nagios_status(ok)
