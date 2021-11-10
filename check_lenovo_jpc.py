@@ -355,17 +355,17 @@ def check_fans():
 	chassisFanIndex,chassisFanDescr,chassisFanSpeed,chassisFanHealthStatus = (1,2,3,10)
 
         for i in fans.values():
-		debug("i %s" % i)
-		debug("chassisFanSpeed %s" % chassisFanSpeed)
-                if i[chassisFanHealthStatus] !="Unknown": # Unknown => notPresent
-			add_long( "Fan %s state=%s speed=%s" % (i[chassisFanIndex],i[chassisFanHealthStatus],i[chassisFanSpeed]) )
-			add_perfdata("Fan%s=%s" %(i[chassisFanIndex],chassisFanSpeed ))
-			# Check fan i
-			if i[chassisFanHealthStatus] == "Normal":
-				nagios_status(ok)
-			else:
-				add_summary("Fan%s NOT OK. " % i[chassisFanIndex])
-				nagios_status(warning)
+			debug("i %s" % i)
+			debug("chassisFanSpeed %s" % chassisFanSpeed)
+			if i[chassisFanHealthStatus] !="Unknown": # Unknown => notPresent
+				add_long( "Fan %s state=%s speed=%s" % (i[chassisFanIndex],i[chassisFanHealthStatus],i[chassisFanSpeed]) )
+				add_perfdata("Fan%s=%s" %(i[chassisFanIndex],chassisFanSpeed ))
+				# Check fan i
+				if i[chassisFanHealthStatus] == "Normal":
+					nagios_status(ok)
+				else:
+					add_summary("Fan%s NOT OK. " % i[chassisFanIndex])
+					nagios_status(warning)
 
 #	num_ok = 0
 #	for i in range(1,4):
@@ -658,23 +658,46 @@ def check_systemhealth():
 			add_long( "* %s. " % (text_row_description) )
 	
 def check_temperature():
-	# set some sensible defaults
-	if opts.warning_threshold is None: opts.warning_threshold = 28
-	if opts.critical_threshold is None: opts.critical_threshold = 35
-	str_temp = snmpget('1.3.6.1.4.1.2.3.51.2.2.1.5.1.0')
-	float_temp,measurement = str_temp.split(None, 1)
-	float_temp = float( float_temp )
-	if opts.critical_threshold is not None and float_temp > opts.critical_threshold:
-		nagios_status(critical)
-		add_summary( "ambient temperature (%s) is over critical thresholds (%s). " % (str_temp, opts.critical_threshold) )
-	elif opts.warning_threshold is not None and float_temp > opts.warning_threshold:
-		nagios_status(warning)
-		add_summary( "ambient temperature (%s) is over warning thresholds (%s). " % (str_temp, opts.warning_threshold) )
-	else:
-		add_summary( "Ambient temperature = %s. " % (str_temp) )
-	add_perfdata( "'ambient_temp'=%s;%s;%s " % (float_temp,opts.warning_threshold,opts.critical_threshold) )
+
+	" Check fan status "
+	#BASE OID
+	#           #CMM OID
+	#           #            #FAN OID
+	fans = getTable("1.3.6.1.4.1.2.3.51.3.1.1.2.1")
+	#	chassisFanIndex,chassisFanId,chassisFanSpeed,chassisFanState,chassisFanSpeedRPM,chassisFanControllerState,chassisFanCoolingZone = (1,2,3,4,5,6,7)
+
+	chassisTempIndex,chassisTempDescr,chassisTempReading,chassisTempHealthStatus = (1,2,3,11)
+
+	for i in fans.values():
+		debug("i %s" % i)
+		debug("chassisTempReading %s" % chassisTempReading)
+		if i[chassisTempHealthStatus] !="Unknown": # Unknown => notPresent
+			add_long( " %s TempHealthStatus=%s TempReading=%s" % (i[chassisTempIndex],i[chassisTempHealthStatus],i[chassisTempReading]) )
+			add_perfdata("Temp%s=%s" %(i[chassisTempIndex],chassisTempHealthStatus ))
+			# Check fan i
+			if i[chassisTempHealthStatus] == "Normal":
+				nagios_status(ok)
+			else:
+				add_summary("Temp%s NOT OK. " % i[chassisTempIndex])
+				nagios_status(warning)
+
+		# set some sensible defaults
+	#if opts.warning_threshold is None: opts.warning_threshold = 28
+	#if opts.critical_threshold is None: opts.critical_threshold = 35
+	#str_temp = snmpget('1.3.6.1.4.1.2.3.51.2.2.1.5.1.0')
+	#float_temp,measurement = str_temp.split(None, 1)
+	#float_temp = float( float_temp )
+	#if opts.critical_threshold is not None and float_temp > opts.critical_threshold:
+#		nagios_status(critical)
+		#add_summary( "ambient temperature (%s) is over critical thresholds (%s). " % (str_temp, opts.critical_threshold) )
+	#elif opts.warning_threshold is not None and float_temp > opts.warning_threshold:
+	#	nagios_status(warning)
+	#	add_summary( "ambient temperature (%s) is over warning thresholds (%s). " % (str_temp, opts.warning_threshold) )
+	#else:
+#		add_summary( "Ambient temperature = %s. " % (str_temp) )
+#	add_perfdata( "'ambient_temp'=%s;%s;%s " % (float_temp,opts.warning_threshold,opts.critical_threshold) )
 	#add_long( "Ambient Temperature = %s" % (str_temp) )
-	nagios_status(ok)
+#	nagios_status(ok)
 	
 
 
