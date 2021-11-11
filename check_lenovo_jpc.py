@@ -102,7 +102,7 @@ import subprocess
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-m","--mode", dest="mode",
-	help="Which check mode is in use (powermodules,system-health,temperature,fans,memories,disks,chassis-status,bladehealth,,switchmodules,coolingzones)")
+	help="Which check mode is in use (powermodules,system-health,temperature,fans,memories,disks,raid)")
 parser.add_option("-H","--host", dest="host",
 	help="Hostname or IP address of the host to check")
 parser.add_option("-w","--warning", dest="warning_threshold",
@@ -436,6 +436,29 @@ def check_disks():
 				add_summary("Disk%s NOT OK. " % i[chassisDiskIndex])
 				nagios_status(warning)
 	
+def check_raid():
+
+	" Check raid status "
+							#BASE OID
+							#           #CMM OID
+							#           #            #DISKS OID
+	raiddrive = getTable(".1.3.6.1.4.1.2.3.51.3.1.13.1.3.1")
+
+	chassisRaidDriveIndex,chassisRaidDriveName,chassisRaidDriveState,chassisRaidDriveHealthStatus = (1,2,4,11)
+
+	for i in raiddrive.values():
+		debug("i %s" % i)
+		debug("chassisRaidDriveHealthStatus %s" % chassisRaidDriveHealthStatus)
+		if i[chassisRaidDriveHealthStatus] !="Unknown": # Unknown => notPresent
+			add_long( " %s RaidDriveName=%s HealthStatus=%s" % (i[chassisRaidDriveIndex],i[chassisRaidDriveName],i[chassisRaidDriveHealthStatus]) )
+			add_perfdata("Temp%s=%s" %(i[chassisRaidDriveIndex],chassisRaidDriveHealthStatus ))
+			# Check raiddrive i
+			if i[chassisRaidDriveHealthStatus] == "Normal":
+				nagios_status(ok)
+			else:
+				add_summary("Raid %s NOT OK. " % i[chassisRaidDriveIndex])
+				nagios_status(warning)
+
 
 if __name__ == '__main__':
 	try:
@@ -446,20 +469,14 @@ if __name__ == '__main__':
 			check_systemhealth()
 		elif opts.mode == 'temperature':
 			check_temperature()
-		elif opts.mode == 'chassis-status':
-			check_chassis_status()
 		elif opts.mode == 'memories':
 			check_memories()
 		elif opts.mode=='disks':
 			check_disks()
-		elif opts.mode == 'bladehealth':
-			check_bladehealth()
 		elif opts.mode == 'fans':
 			check_fans()
-		elif opts.mode == 'coolingzones':
-			check_coolingzones()
-		elif opts.mode == 'switchmodules':
-			check_switchmodules()
+		elif opts.mode == 'raid':
+			check_raid()
 		else:
 			parser.error("%s is not a valid option for --mode" % opts.mode)
 	except Exception, e:
