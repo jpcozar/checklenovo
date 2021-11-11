@@ -102,7 +102,7 @@ import subprocess
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-m","--mode", dest="mode",
-	help="Which check mode is in use (powermodules,system-health,temperature,fans,memories,chassis-status,bladehealth,,switchmodules,coolingzones)")
+	help="Which check mode is in use (powermodules,system-health,temperature,fans,memories,disks,chassis-status,bladehealth,,switchmodules,coolingzones)")
 parser.add_option("-H","--host", dest="host",
 	help="Hostname or IP address of the host to check")
 parser.add_option("-w","--warning", dest="warning_threshold",
@@ -309,48 +309,12 @@ def check_powermodules():
 			
 	nagios_status(ok)
 
-def check_switchmodules():
-                                  #BASE OID
-                                  #                  #CMM
-				  #                  #  #COMPONENTS
-                                  #                  #  #     #SWITCH OID
-	switchmodules = getTable("1.3.6.1.4.1.2.3.51.2.22.3.1.1")
-	# The following oid is undocumented, but contains some useful extra info
-	try:
-		extrainfo = getTable("1.3.6.1.4.1.2.3.51.2.22.3.1.7").values()
-	except:
-		extrainfo = []
-	for module in switchmodules.values():
-		myIndex = module[1]
-		healthstate = module[15]
-		resultavailable = module[3]
-		resultvalue = module[4]
-		enabledisable = module[6]
-		if resultavailable == "1":
-			'this module is installed'
-			if healthstate == "1":
-				nagios_status(ok)
-				add_long("Module%s health good.\n  post=%s" % (myIndex,resultvalue))
-			else:
-				nagios_status(warning)
-				add_long("Module%s health bad(%s).\n  post=%s" % (myIndex, healthstate,resultvalue) )
-				add_summary("Problem with Module %s. " % (myIndex))
-			if len(extrainfo) > int(myIndex):
-				myExtraInfo = extrainfo[int(myIndex)-1]
-				module_type = myExtraInfo[22]
-				module_ip = myExtraInfo[6]
-				add_long( "  type=%s ip=%s" % (module_type,module_ip) )
-	if exit_status == ok:
-		add_summary("All switchmodules healthy")
-		
-
 def check_fans():
 	" Check fan status "
                          #BASE OID
                          #           #CMM OID
                          #           #            #FAN OID
 	fans = getTable("1.3.6.1.4.1.2.3.51.3.1.3.2.1")
-#	chassisFanIndex,chassisFanId,chassisFanSpeed,chassisFanState,chassisFanSpeedRPM,chassisFanControllerState,chassisFanCoolingZone = (1,2,3,4,5,6,7)
 
 	chassisFanIndex,chassisFanDescr,chassisFanSpeed,chassisFanHealthStatus = (1,2,3,10)
 
@@ -367,24 +331,6 @@ def check_fans():
 					add_summary("Fan%s NOT OK. " % i[chassisFanIndex])
 					nagios_status(warning)
 
-#	num_ok = 0
-#	for i in range(1,4):
-#		if fans[i][chassisFanState] != "1":
-#			num_ok = num_ok + 1
-#	if num_ok > 1:
-#		add_summary("ChassisCoolingZone1 NOT OK. ")
-#		nagios_status(critical)
-#	num_ok = 0
-#	for i in range(6,9):
-#		if fans[i][chassisFanState] != "1":
-#			num_ok = num_ok + 1
-#	if num_ok > 1:
-#		add_summary("ChassisCoolingZone2 NOT OK. ")
-#		nagios_status(critical)
-#	if fans[5][chassisFanState] != "1" or fans[10][chassisFanState] != "1":
-#		add_summary("ChassisCoolingZone 3 and 4 NOT OK. ")
-#		nagios_status(critical)
-
 def check_memories():
 	" Check module memories status "
                          #BASE OID
@@ -400,250 +346,15 @@ def check_memories():
 			if i[chassisMemHealthStatus] !="Unknown": # Unknown => notPresent
 				add_long( "Memory %s state=%s Description=%s" % (i[chassisMemIndex],i[chassisMemHealthStatus],i[chassisMemDescr]) )
 				add_perfdata("Memory%s=%s" %(i[chassisMemIndex],chassisMemDescr))
-				# Check fan i
+				# Check module i
 				if i[chassisMemHealthStatus] == "Normal":
 					nagios_status(ok)
 				else:
 					add_summary("Mem%s NOT OK. " % i[chassisMemIndex])
 					nagios_status(warning)
 
-def check_coolingzones():
-	" Check cooling zone status "
-                         #BASE OID
-                         #           #CMM OID
-                         #           #            #FAN OID
-	fans = getTable("1.3.6.1.4.1.2.3.51.2.2.3.50")
-	chassisFanIndex,chassisFanId,chassisFanSpeed,chassisFanState,chassisFanSpeedRPM,chassisFanControllerState,chassisFanCoolingZone = (1,2,3,4,5,6,7)
-#	for i in fans.values():
-#		debug("i %s" % i)
-#		mychassisFanSpeedRPM = i[chassisFanSpeedRPM] 
-#		mychassisFanSpeedRPM = mychassisFanSpeedRPM.split(None,1)[0]
-#		debug("mychassisFanSpeedRPM %s" % mychassisFanSpeedRPM)
-#		if i[chassisFanControllerState] != "2": # not notPresent -> present
-#			add_long( "Fan %s state=%s speed=%s" % (i[chassisFanIndex],i[chassisFanState],i[chassisFanSpeedRPM]) )
-#			add_perfdata("Fan%s=%s" %(i[chassisFanIndex],mychassisFanSpeedRPM ))
-#			# Check fan i
-#			if i[chassisFanState] == "1":
-#				nagios_status(ok)
-#			else:
-#				add_summary("Fan%s NOT OK. " % i[chassisFanIndex])
-#				nagios_status(warning)
-#
-	num_ok = 0
-	for i in range(1,4):
-		if fans[i][chassisFanState] == "2" or fans[i][chassisFanState] == "3":
-			num_ok = num_ok + 1
-	if num_ok == 0:
-		add_summary("ChassisCoolingZone1 OK. ")
-		nagios_status(ok)
-	elif num_ok == 1:
-		add_summary("ChassisCoolingZone1 NOT OK. ")
-		nagios_status(warning)
-	else:
-		add_summary("ChassisCoolingZone1 NOT OK. ")
-		nagios_status(critical)
-		
-	num_ok = 0
-	for i in range(6,9):
-		if fans[i][chassisFanState] == "2" or fans[i][chassisFanState] == "3":
-			num_ok = num_ok + 1
-	if num_ok == 0:
-		add_summary("ChassisCoolingZone2 OK. ")
-		nagios_status(ok)
-	elif num_ok == 1:
-		add_summary("ChassisCoolingZone2 NOT OK. ")
-		nagios_status(warning)
-	else:
-		add_summary("ChassisCoolingZone2 NOT OK. ")
-		nagios_status(critical)
-
-	if fans[5][chassisFanState] != "1":
-		add_summary("ChassisCoolingZone 3 NOT OK. ")
-		nagios_status(critical)
-	else:
-		add_summary("ChassisCoolingZone 3 OK. ")
-		nagios_status(ok)
-
-	if fans[10][chassisFanState] != "1":
-		add_summary("ChassisCoolingZone 4 NOT OK. ")
-		nagios_status(critical)
-	else:
-		add_summary("ChassisCoolingZone 4 OK. ")
-		nagios_status(ok)
 		
 
-#######TODO STUFF#############
-#                                       #BASE OID
-#                                       #           #CMM OID
-#                                       #           #            #COOLINGZONE OID
-#	ChassisCoolingZone = getTable("1.3.6.1.4.1.2.3.51.2.2.3.51")
-#	chassisCoolingIndex,chassisCoolingZone,chassisCoolingZoneStatus,chassisCoolingZoneComponent = (1,2,3,4)
-#	nok_zone1 = 0
-#	nok_zone2 = 0
-#	for i in ChassisCoolingZone.values():
-#		debug("i %s" % i)
-#		if i[chassisCoolingZoneStatus] == "0" or i[chassisCoolingZoneStatus] == "1":
-#			continue
-#		elif i[chassisCoolingZoneStatus] == "2":
-#			if i[chassisCoolingZone] == 1:
-#				nok_zone1 = nok_zone1 + 1
-#			elif i[chassisCoolingZone] == 2:
-#				nok_zone2 = nok_zone2 + 1
-#		elif i[chassisCoolingZoneStatus] == "3":
-#			if i[chassisCoolingZone] == 1:
-#				nok_zone1 = nok_zone1 + 2
-#			elif i[chassisCoolingZone] == 2:
-#				nok_zone2 = nok_zone2 + 2
-#	
-#	add_long( "ChassisCoolingZone %s state=%s " % (i[chassisCoolingZone],i[chassisCoolingZoneStatus]))
-#	add_summary("ChassisCoolingZone%s OK. " % i[chassisCoolingZoneStatus])
-#	nagios_status(ok)
-#
-#
-#	add_summary("ChassisCoolingZone%s NOT OK. " % i[chassisCoolingZoneStatus])
-#	nagios_status(warning)
-#
-#
-#	add_summary("ChassisCoolingZone%s NOT OK. " % i[chassisCoolingZoneStatus])
-#	nagios_status(critical)
-
-
-def check_chassis_status():
-	chassis = getTable('1.3.6.1.4.1.2.3.51.2.2.5.2')
-	oids = chassis.values()[0]
-	chassis_oid = {
-		10 :"bistBootRomFlashImage",
-		11 :"bistEthernetPort1",
-		113 :"bistSwitchModulesCommunicating",
-		14 :"bistExternalI2CDevices",
-		19 :"bistInternalEthernetSwitch",
-		25 :"bistPrimaryKernel",
-		26 :"bistSecondaryKernel",
-		29 :"bistPhysicalNetworkLink",
-		30 :"bistLogicalNetworkLink",
-		33 :"bistBladesInstalled",
-		49 :"bistBladesCommunicating",
-		5  :"bistRtc",
-		65 :"bistBlowersInstalled",
-		7  :"bistLocalI2CBus",
-		73 :"bistBlowersFunctional",
-		74 :"bistMediaTrayInstalled",
-		75 :"bistMediaTrayCommunicating",
-		8  :"bistPrimaryMainAppFlashImage",
-		81 :"bistPowerModulesInstalled",
-		89 :"bistPowerModulesFunctional",
-		9  :"bistSecondaryMainAppFlashImage",
-		97 :"bistSwitchModulesInstalled",
-	}
-	
-	# Check if all blades are working
-	bistBladesInstalled = 33
-	bistBlowersInstalled = 65
-	bistMediaTrayInstalled = 74
-	bistPowerModulesInstalled = 81
-	bistSwitchModulesInstalled = 97
-	bistSwitchModulesCommunicating = 113
-	bistBladesCommunicating = 49
-	bistMediaTrayCommunicating = 75
-	bistBlowersFunctional = 73
-	bistPowerModulesFunctional = 89
-	
-	# Check Blade Communications
-	if not oids.has_key(bistBladesInstalled) or not oids.has_key(bistBladesCommunicating):
-		add_summary( "Blades N/A. ")
-	elif oids[bistBladesInstalled] == oids[bistBladesCommunicating]:
-		nagios_status(ok)
-		add_summary( "Blades OK. " )
-	else:
-		nagios_status(warning)
-		add_summary( "Blades NOT OK. " )
-	# Check PowerModule Status
-	if not oids.has_key(bistPowerModulesFunctional) or not oids.has_key(bistPowerModulesInstalled):
-		add_summary( "Powermodules N/A. ")
-	elif oids[bistPowerModulesFunctional] == oids[bistPowerModulesInstalled]:
-		nagios_status(ok)
-		add_summary( "PowerModules OK. " )
-	else:
-		nagios_status(warning)
-		add_summary( "PowerModules NOT OK. " )
-	
-	# Check SwitchModule Communications
-	if not oids.has_key(bistSwitchModulesCommunicating) or not oids.has_key(bistSwitchModulesInstalled):
-		add_summary( "SwitchModules N/A. ")
-	if oids[bistSwitchModulesCommunicating] == oids[bistSwitchModulesInstalled]:
-		nagios_status(ok)
-		add_summary("Switchmodules OK. ")
-	else:
-		nagios_status(warning)
-		add_summary( "Switchmodules NOT OK. ")
-	# Check fan status
-	if not oids.has_key(bistBlowersInstalled) or not oids.has_key(bistBlowersFunctional):
-		add_summary( "Blowers N/A. ")
-	elif oids[bistBlowersInstalled] == oids[bistBlowersFunctional]:
-		nagios_status(ok)
-		add_summary( "Blowers OK. " )
-	else:
-		nagios_status(warning)
-		add_summary( "Blowers NOT OK. " )
-	# Check Media Tray Status
-	if not oids.has_key(bistMediaTrayCommunicating) or not oids.has_key(bistMediaTrayInstalled):
-		nagios_status(ok)
-		add_summary( "Media Trays N/A. ")
-	elif oids[bistMediaTrayCommunicating] == oids[bistMediaTrayInstalled]:
-		add_summary( "Media Trays OK. " )
-	else:
-		nagios_status(warning)
-		add_summary( "Media Trays NOT OK. " )
-	
-	
-	# status_oids, oids that where 0 == ok
-	status_oids = ( 5,7,8,9,10,11,14,19,20,21,22,23,24,25,26,27,28,29,30, )
-	
-	add_long("Other Sensors: ")
-	sensor_status = ok	
-	for oid in status_oids:
-		if not chassis_oid.has_key(oid): continue
-		oidValue = oids[oid]
-		oidName = chassis_oid[oid]
-		if oidValue == "0":
-			friendly_status = "%s (ok)" % oidValue
-		else:
-			friendly_status = "%s (not ok)" % oidValue
-			nagios_status(warning)
-			sensor_status = warning
-			add_summary( "%s is %s" % oidName, friendly_status)
-		add_long( " %s status: %s" % (oidName,friendly_status) )
-	if sensor_status == ok:
-		add_summary( "Other Sensors: OK. ")
-			
-
-def check_bladehealth():
-	blades = getTable('1.3.6.1.4.1.2.3.51.2.22.1.5.2.1')
-	bladestate = getTable('1.3.6.1.4.1.2.3.51.2.22.1.5.1.1').values()
-	index,bladeid,severity,description = (1,2,3,4)
-	good_blades = 0
-	total_blades = 0
-	for i,row in enumerate(blades.values()):
-		myIndex = row[index]
-		myBladeid = row[bladeid]
-		mySeverity = row[severity]
-		myDescription = row[description]
-		try: myName = bladestate[i][6]
-		except: myName = ""
-		if mySeverity == "(No severity)": continue
-		add_long( "blade%s (%s): %s %s" % (myBladeid,myName,mySeverity, myDescription) )
-		total_blades += 1
-		if mySeverity == 'Good':
-			nagios_status(ok)
-			good_blades += 1
-		else:
-			nagios_status(warning)
-			add_summary( "blade%s (%s): %s %s. " % (myBladeid,myName,mySeverity, myDescription) )
-	if good_blades == total_blades:
-		add_summary( "%s out of %s blades in Good health. " % (good_blades, total_blades))
-		nagios_status(ok)
-	else:
-		nagios_status(warning)
 
 def check_systemhealth():
 	systemhealthstat = snmpget('1.3.6.1.4.1.2.3.51.3.1.4.1.0')
@@ -681,47 +392,50 @@ def check_systemhealth():
 	
 def check_temperature():
 
-	" Check fan status "
-	#BASE OID
-	#           #CMM OID
-	#           #            #FAN OID
-	fans = getTable("1.3.6.1.4.1.2.3.51.3.1.1.2.1")
-	#	chassisFanIndex,chassisFanId,chassisFanSpeed,chassisFanState,chassisFanSpeedRPM,chassisFanControllerState,chassisFanCoolingZone = (1,2,3,4,5,6,7)
+	" Check temperature status "
+							#BASE OID
+							#           #CMM OID
+							#           #            #TEMPERATURE OID
+	thermometers = getTable("1.3.6.1.4.1.2.3.51.3.1.1.2.1")
 
 	chassisTempIndex,chassisTempDescr,chassisTempReading,chassisTempHealthStatus = (1,2,3,11)
 
-	for i in fans.values():
+	for i in thermometers.values():
 		debug("i %s" % i)
 		debug("chassisTempReading %s" % chassisTempReading)
 		if i[chassisTempHealthStatus] !="Unknown": # Unknown => notPresent
-			add_long( " %s TempHealthStatus=%s TempReading=%s" % (i[chassisTempIndex],i[chassisTempHealthStatus],i[chassisTempReading]) )
+			add_long( " %s TempHealthStatus=%s TempReading=%s TempDescr=%s" % (i[chassisTempIndex],i[chassisTempHealthStatus],i[chassisTempReading],i[chassisTempDescr]) )
 			add_perfdata("Temp%s=%s" %(i[chassisTempIndex],chassisTempHealthStatus ))
-			# Check fan i
+			# Check disk i
 			if i[chassisTempHealthStatus] == "Normal":
 				nagios_status(ok)
 			else:
 				add_summary("Temp%s NOT OK. " % i[chassisTempIndex])
 				nagios_status(warning)
-
-		# set some sensible defaults
-	#if opts.warning_threshold is None: opts.warning_threshold = 28
-	#if opts.critical_threshold is None: opts.critical_threshold = 35
-	#str_temp = snmpget('1.3.6.1.4.1.2.3.51.2.2.1.5.1.0')
-	#float_temp,measurement = str_temp.split(None, 1)
-	#float_temp = float( float_temp )
-	#if opts.critical_threshold is not None and float_temp > opts.critical_threshold:
-#		nagios_status(critical)
-		#add_summary( "ambient temperature (%s) is over critical thresholds (%s). " % (str_temp, opts.critical_threshold) )
-	#elif opts.warning_threshold is not None and float_temp > opts.warning_threshold:
-	#	nagios_status(warning)
-	#	add_summary( "ambient temperature (%s) is over warning thresholds (%s). " % (str_temp, opts.warning_threshold) )
-	#else:
-#		add_summary( "Ambient temperature = %s. " % (str_temp) )
-#	add_perfdata( "'ambient_temp'=%s;%s;%s " % (float_temp,opts.warning_threshold,opts.critical_threshold) )
-	#add_long( "Ambient Temperature = %s" % (str_temp) )
-#	nagios_status(ok)
 	
+def check_disks():
 
+	" Check disks status "
+							#BASE OID
+							#           #CMM OID
+							#           #            #DISKS OID
+	disks = getTable(".1.3.6.1.4.1.2.3.51.3.1.12.2.1")
+
+	chassisDiskIndex,chassisDiskName,chassisDiskHealthStatus = (1,2,3)
+
+	for i in disks.values():
+		debug("i %s" % i)
+		debug("chassisDisksHealthStatus %s" % chassisDiskHealthStatus)
+		if i[chassisDiskHealthStatus] !="Unknown": # Unknown => notPresent
+			add_long( " %s DiskName=%s HealthStatus=%s" % (i[chassisDiskIndex],i[chassisDiskName],i[chassisDiskHealthStatus]) )
+			add_perfdata("Temp%s=%s" %(i[chassisDiskIndex],chassisDiskHealthStatus ))
+			# Check disk i
+			if i[chassisDiskHealthStatus] == "Normal":
+				nagios_status(ok)
+			else:
+				add_summary("Disk%s NOT OK. " % i[chassisDiskIndex])
+				nagios_status(warning)
+	
 
 if __name__ == '__main__':
 	try:
@@ -736,6 +450,8 @@ if __name__ == '__main__':
 			check_chassis_status()
 		elif opts.mode == 'memories':
 			check_memories()
+		elif opts.mode=='disks':
+			check_disks()
 		elif opts.mode == 'bladehealth':
 			check_bladehealth()
 		elif opts.mode == 'fans':
