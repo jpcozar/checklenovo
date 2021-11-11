@@ -102,7 +102,7 @@ import subprocess
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-m","--mode", dest="mode",
-	help="Which check mode is in use (powermodules,system-health,temperature,chassis-status,bladehealth,fans,switchmodules,coolingzones)")
+	help="Which check mode is in use (powermodules,system-health,temperature,fans,memories,chassis-status,bladehealth,,switchmodules,coolingzones)")
 parser.add_option("-H","--host", dest="host",
 	help="Hostname or IP address of the host to check")
 parser.add_option("-w","--warning", dest="warning_threshold",
@@ -384,6 +384,28 @@ def check_fans():
 #	if fans[5][chassisFanState] != "1" or fans[10][chassisFanState] != "1":
 #		add_summary("ChassisCoolingZone 3 and 4 NOT OK. ")
 #		nagios_status(critical)
+
+def check_memories():
+	" Check module memories status "
+                         #BASE OID
+                         #           #CMM OID
+                         #           #            #FAN OID
+	memories = getTable("1.3.6.1.4.1.2.3.51.3.1.5.21.1")
+
+	chassisMemIndex,chassisMemDescr,chassisMemSerialNumber,chassisMemHealthStatus = (1,2,4,8)
+
+        for i in memories.values():
+			debug("i %s" % i)
+			debug("chassisMemSerialNumber %s" % chassisMemSerialNumber)
+			if i[chassisMemHealthStatus] !="Unknown": # Unknown => notPresent
+				add_long( "Memory %s state=%s Description=%s" % (i[chassisMemIndex],i[chassisMemHealthStatus],i[chassisMemDescr]) )
+				add_perfdata("Memory%s=%s" %(i[chassisMemIndex],chassisMemDescr))
+				# Check fan i
+				if i[chassisMemHealthStatus] == "Normal":
+					nagios_status(ok)
+				else:
+					add_summary("Mem%s NOT OK. " % i[chassisMemIndex])
+					nagios_status(warning)
 
 def check_coolingzones():
 	" Check cooling zone status "
@@ -712,6 +734,8 @@ if __name__ == '__main__':
 			check_temperature()
 		elif opts.mode == 'chassis-status':
 			check_chassis_status()
+		elif opts.mode == 'memories':
+			check_memories()
 		elif opts.mode == 'bladehealth':
 			check_bladehealth()
 		elif opts.mode == 'fans':
