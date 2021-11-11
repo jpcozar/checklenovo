@@ -16,9 +16,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # About this script
-# 
-# This script will check the status of a remote Lenovo Enterprise Flex Chassis
-# orginal file check_ibm_bladecenter.py renamed and modified by Silvio Erdenberger, 
+# * fork the code from check_lenovo_flex.py for Lenovo servers X3650 M5
+# * used imm.mib 1.48 from Lenovo
+# * changed the name to check_lenovo_jpc.py
+# * added check_disks, check_raids, and check_memories functions
+# * deleted chasis-status, bladehealth,switchmodules, coolingzones functions
+# * adapted OIDs to imm.mib for other modules: powermodules, system-health
+
 #
 # version 1.3
 # 8.12.2017
