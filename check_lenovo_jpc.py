@@ -327,7 +327,7 @@ def check_fans():
 			debug("chassisFanSpeed %s" % chassisFanSpeed)
 			if i[chassisFanHealthStatus] !="Unknown": # Unknown => notPresent
 				add_long( "Fan %s state=%s speed=%s" % (i[chassisFanIndex],i[chassisFanHealthStatus],i[chassisFanSpeed]) )
-				add_perfdata("Fan%s=%s" %(i[chassisFanIndex],chassisFanSpeed ))
+				add_perfdata("Fan%s=%s" %(i[chassisFanIndex],i[chassisFanHealthStatus]))
 				# Check fan i
 				if i[chassisFanHealthStatus] == "Normal":
 					nagios_status(ok)
@@ -349,7 +349,7 @@ def check_memories():
 			debug("chassisMemSerialNumber %s" % chassisMemSerialNumber)
 			if i[chassisMemHealthStatus] !="Unknown": # Unknown => notPresent
 				add_long( "Memory %s state=%s Description=%s" % (i[chassisMemIndex],i[chassisMemHealthStatus],i[chassisMemDescr]) )
-				add_perfdata("Memory%s=%s" %(i[chassisMemIndex],chassisMemDescr))
+				add_perfdata("Memory%s=%s" %(i[chassisMemIndex],i[chassisMemHealthStatus]))
 				# Check module i
 				if i[chassisMemHealthStatus] == "Normal":
 					nagios_status(ok)
@@ -409,7 +409,7 @@ def check_temperature():
 		debug("chassisTempReading %s" % chassisTempReading)
 		if i[chassisTempHealthStatus] !="Unknown": # Unknown => notPresent
 			add_long( " %s TempHealthStatus=%s TempReading=%s TempDescr=%s" % (i[chassisTempIndex],i[chassisTempHealthStatus],i[chassisTempReading],i[chassisTempDescr]) )
-			add_perfdata("Temp%s=%s" %(i[chassisTempIndex],chassisTempHealthStatus ))
+			add_perfdata("Temp%s=%s" %(i[chassisTempIndex],i[chassisTempHealthStatus]))
 			# Check disk i
 			if i[chassisTempHealthStatus] == "Normal":
 				nagios_status(ok)
@@ -432,7 +432,7 @@ def check_disks():
 		debug("chassisDisksHealthStatus %s" % chassisDiskHealthStatus)
 		if i[chassisDiskHealthStatus] !="Unknown": # Unknown => notPresent
 			add_long( " %s DiskName=%s HealthStatus=%s" % (i[chassisDiskIndex],i[chassisDiskName],i[chassisDiskHealthStatus]) )
-			add_perfdata("Temp%s=%s" %(i[chassisDiskIndex],chassisDiskHealthStatus ))
+			add_perfdata("Disk%s=%s" %(i[chassisDiskIndex],i[chassisDiskHealthStatus] ))
 			# Check disk i
 			if i[chassisDiskHealthStatus] == "Normal":
 				nagios_status(ok)
@@ -455,7 +455,7 @@ def check_raid():
 		debug("chassisRaidDriveHealthStatus %s" % chassisRaidDriveHealthStatus)
 		if i[chassisRaidDriveHealthStatus] !="Unknown": # Unknown => notPresent
 			add_long( " %s RaidDriveName=%s HealthStatus=%s" % (i[chassisRaidDriveIndex],i[chassisRaidDriveName],i[chassisRaidDriveHealthStatus]) )
-			add_perfdata("Temp%s=%s" %(i[chassisRaidDriveIndex],chassisRaidDriveHealthStatus ))
+			add_perfdata("Raid%s=%s" %(i[chassisRaidDriveIndex],i[chassisRaidDriveHealthStatus]))
 			# Check raiddrive i
 			if i[chassisRaidDriveHealthStatus] == "Normal":
 				nagios_status(ok)

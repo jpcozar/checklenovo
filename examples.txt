@@ -1,0 +1,105 @@
+SYSTEM-HEALTH
+=============
+
+[user@nagios]$  python ./check_lenovo_jpc.py  -H 192.168.1.10 --snmp_version 3 --snmp_username snmpv3 --snmp_aprotocol=SHA --snmp_apassword <authPW> --snmp_security_level authPriv --snmp_pprotocol AES --snmp_ppassword <PrivPW> --mode system-health
+OK - Lenovo 3650 health: OK.  |
+
+POWERMODULES
+============
+
+[user@nagios]$  python ./check_lenovo_jpc.py  -H 192.168.1.10 --snmp_version 3 --snmp_username snmpv3 --snmp_aprotocol=SHA --snmp_apassword <authPW> --snmp_security_level authPriv --snmp_pprotocol AES --snmp_ppassword <PrivPW> --mode powermodules
+
+OK - 3 out of 3 powermodules are healthy |  'Number of powermodules'=3
+
+Powersupply "0" status "Normal". Unknown.
+Powersupply "1" status "Normal". 00YL555.
+Powersupply "2" status "Normal". 00YL555.
+
+MEMORIES
+========
+
+[user@nagios]$  python ./check_lenovo_jpc.py  -H 192.168.1.10 --snmp_version 3 --snmp_username snmpv3 --snmp_aprotocol=SHA --snmp_apassword <authPW> --snmp_security_level authPriv --snmp_pprotocol AES --snmp_ppassword <PrivPW> --mode memories
+
+OK -  |  Memory1=Normal  Memory2=Normal  Memory3=Normal  Memory4=Normal  Memory5=Normal  Memory6=Normal  Memory7=Normal  Memory8=Normal  Memory9=Normal  Memory10=Normal  Memory11=Normal  Memory12=Normal  Memory13=Normal  Memory14=Normal  Memory15=Normal  Memory16=Normal
+
+
+Memory 1 state=Normal Description=DIMM 1
+Memory 2 state=Normal Description=DIMM 2
+Memory 3 state=Normal Description=DIMM 4
+Memory 4 state=Normal Description=DIMM 5
+Memory 5 state=Normal Description=DIMM 8
+Memory 6 state=Normal Description=DIMM 9
+Memory 7 state=Normal Description=DIMM 11
+Memory 8 state=Normal Description=DIMM 12
+Memory 9 state=Normal Description=DIMM 13
+Memory 10 state=Normal Description=DIMM 14
+Memory 11 state=Normal Description=DIMM 16
+Memory 12 state=Normal Description=DIMM 17
+Memory 13 state=Normal Description=DIMM 20
+Memory 14 state=Normal Description=DIMM 21
+Memory 15 state=Normal Description=DIMM 23
+Memory 16 state=Normal Description=DIMM 24
+
+FANS
+====
+
+[user@nagios]$  python ./check_lenovo_jpc.py  -H 192.168.1.10 --snmp_version 3 --snmp_username snmpv3 --snmp_aprotocol=SHA --snmp_apassword <authPW> --snmp_security_level authPriv --snmp_pprotocol AES --snmp_ppassword <PrivPW> --mode fans
+
+OK -  |  Fan1=Normal  Fan3=Normal  Fan5=Normal  Fan7=Normal  Fan9=Normal  Fan11=Normal
+
+Fan 1 state=Normal speed= 26% of maximum
+Fan 3 state=Normal speed= 27% of maximum
+Fan 5 state=Normal speed= 27% of maximum
+Fan 7 state=Normal speed= 26% of maximum
+Fan 9 state=Normal speed= 26% of maximum
+Fan 11 state=Normal speed= 27% of maximum
+
+DISKS
+=====
+
+[user@nagios]$  python ./check_lenovo_jpc.py  -H 192.168.1.10 --snmp_version 3 --snmp_username snmpv3 --snmp_aprotocol=SHA --snmp_apassword <authPW> --snmp_security_level authPriv --snmp_pprotocol AES --snmp_ppassword <PrivPW> --mode disks
+
+OK -  |  Disk0=Normal  Disk1=Normal
+
+ 0 DiskName=Drive 0 HealthStatus=Normal
+ 1 DiskName=Drive 1 HealthStatus=Normal
+
+RAID
+====
+
+[user@nagios]$  python ./check_lenovo_jpc.py  -H 192.168.1.10 --snmp_version 3 --snmp_username snmpv3 --snmp_aprotocol=SHA --snmp_apassword <authPW> --snmp_security_level authPriv --snmp_pprotocol AES --snmp_ppassword <PrivPW> --mode raid
+
+
+OK -  |  Raid1=Normal  Raid2=Normal
+
+ 1 RaidDriveName=Drive 0  HealthStatus=Normal
+ 2 RaidDriveName=Drive 1  HealthStatus=Normal
+
+TEMPERATURE
+===========
+
+[user@nagios]$  python ./check_lenovo_jpc.py  -H 192.168.1.10 --snmp_version 3 --snmp_username snmpv3 --snmp_aprotocol=SHA --snmp_apassword <authPW> --snmp_security_level authPriv --snmp_pprotocol AES --snmp_ppassword <PrivPW> --mode temperature
+
+OK -  |  Temp1=Normal  Temp2=Normal  Temp3=Normal  Temp4=Normal  Temp5=Normal  Temp6=Normal  Temp7=Normal  Temp8=Normal  Temp9=Normal  Temp10=Normal  Temp11=Normal  Temp12=Normal  Temp13=Normal  Temp14=Normal  Temp17=Normal  Temp18=Normal
+
+ 1 TempHealthStatus=Normal TempReading=51 TempDescr=PCH Temp
+ 2 TempHealthStatus=Normal TempReading=21 TempDescr=Ambient Temp
+ 3 TempHealthStatus=Normal TempReading=32 TempDescr=RS1 RR Amb Temp
+ 4 TempHealthStatus=Normal TempReading=36 TempDescr=RS2 RR Amb Temp
+ 5 TempHealthStatus=Normal TempReading=30 TempDescr=MID1 RR Amb Temp
+ 6 TempHealthStatus=Normal TempReading=31 TempDescr=MID2 RR Amb Temp
+ 7 TempHealthStatus=Normal TempReading=32 TempDescr=RAID RR Amb Temp
+ 8 TempHealthStatus=Normal TempReading=29 TempDescr=PSU FR Amb Temp
+ 9 TempHealthStatus=Normal TempReading=11 TempDescr=CPU1 VR Temp
+ 10 TempHealthStatus=Normal TempReading=11 TempDescr=CPU2 VR Temp
+ 11 TempHealthStatus=Normal TempReading=29 TempDescr=DIMM AB VR Temp
+ 12 TempHealthStatus=Normal TempReading=32 TempDescr=DIMM CD VR Temp
+ 13 TempHealthStatus=Normal TempReading=31 TempDescr=DIMM EF VR Temp
+ 14 TempHealthStatus=Normal TempReading=32 TempDescr=DIMM GH VR Temp
+ 17 TempHealthStatus=Normal TempReading=31 TempDescr=CPU 1 Temp
+ 18 TempHealthStatus=Normal TempReading=31 TempDescr=CPU 2 Temp
+
+
+
+
+
