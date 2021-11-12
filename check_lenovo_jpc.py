@@ -1,5 +1,6 @@
 #!/usr/bin/python
-# checklenovo
+
+# checklenovo v1.0
 # Nagios Plugin for the Lenovo  System X3650 M5 
 # Javier Polo Cózar <jpcozar@yahoo.es>
 
@@ -20,15 +21,13 @@
 
 # This script is a fork from check_lenovo_flex https://github.com/serdenberger/check_lenovo_flex
 
-# It has been modified to 
-
 # This script will check: system-health, powermodules, fans, raid, disks, temperature and memory modules
 
 # Examples can be found in examples.txt file
 
 
 # No real need to change anything below here
-version="1.3"
+version="1.0"
 ok=0
 warning=1
 critical=2
