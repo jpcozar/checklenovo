@@ -1,78 +1,30 @@
 #!/usr/bin/python
-#
-# Copyright 2010, Pall Sigurdsson <palli@opensource.is>
-#
+# checklenovo
+# Nagios Plugin for the Lenovo  System X3650 M5 
+# Javier Polo Cózar <jpcozar@yahoo.es>
+
 # This script is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-#
+
 # This script is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-#
+
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# About this script
-# * fork the code from check_lenovo_flex.py for Lenovo servers X3650 M5
-# * used imm.mib 1.48 from Lenovo
-# * changed the name to check_lenovo_jpc.py
-# * added check_disks, check_raids, and check_memories functions
-# * deleted chasis-status, bladehealth,switchmodules, coolingzones functions
-# * adapted OIDs to imm.mib for other modules: powermodules, system-health
+# About this script for Lenovo System X3650 M5
 
-#
-# version 1.3
-# 8.12.2017
-# adding
-# * add coolingzone feature 
-#
-# fixes
-# * fix wrong compares in fans (fans)
-#
-# changes
-# * rewrite the check_fans
-#
-#
-# version 1.2
-# 30.11.2017
-# changes 
-# * renamed --snmp-password to --snmp_apassword
-# * fix a wrong validation of Authentication password in the options parameter
-# * fix some typo in the help
-# 
-# version 1.1
-# 17.11.2017
-# change filename to check_lenovo_flex.py
-# there are several changes to the IBM Bladecenter, whic are not compatible
-# changes in version 1.1
-# * add possibility to a Privacy Password for authPriv in snmp_security_level
-# * required parameter depending on --snmp_security_level
-# * add authentication encryption and password
-# * add privacy encryption and password
-#
-# powermodules
-#
-# system-health -> adjust to flex chassis
-#  if no error, the error oid don't exist
-#
-# temperature -> no change
-#
-# chassis-status to flex adjusted 
-#
-# bladehealth
-#
-# fans -> adjust to flex chassis
-#
-# coolingzones 
-# implemented on fan based devices
-# TODO change the OID ChassisCoolingZone
-# but some issues appear
-#  
-# switchmodules
-#  
+# This script is a fork from check_lenovo_flex https://github.com/serdenberger/check_lenovo_flex
+
+# It has been modified to 
+
+# This script will check: system-health, powermodules, fans, raid, disks, temperature and memory modules
+
+# Examples can be found in examples.txt file
 
 
 # No real need to change anything below here
